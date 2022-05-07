@@ -1,0 +1,299 @@
+<html>
+   <head>
+      <style>
+      canvas{
+      border:1px solid black;
+      width:320px;
+      height:240px;
+      }
+      </style>
+   </head>
+   <body onload="Inicialize();">
+      <canvas id="c" width="320" height="240"></canvas>
+      <input type="text" id="cnt"/>
+
+      <script>
+          var c = document.getElementById("c")
+          var cnt = document.getElementById("cnt")
+          var ctx = c.getContext("2d");
+          var count = 0;
+          var objects = [];
+          //ctx.translate(140,100);
+          function Inicialize() {
+              objects[0] = new Object();
+              objects[0].x = 120;
+              objects[0].y = 160;
+              objects[0].type = "actor";
+          }
+          function Animate() {
+
+              ctx.fillStyle = "white";
+              ctx.fillRect(-1000, -1000, 2000, 2000);
+              /*
+              if (count > 360)
+              count = 0;
+
+              ctx.fillStyle = "black";
+              ctx.fillRect(100, 100, 10, 10);
+
+              ctx.save();
+              ctx.translate(125, 105);
+              ctx.rotate((count * Math.PI / 180) * -1);
+              ctx.fillStyle = "red";
+              ctx.fillRect(-5, -5, 10, 10);
+              ctx.restore();
+
+              ctx.save();
+              ctx.translate(145, 105);
+              ctx.rotate(count * Math.PI / 180);
+              ctx.fillStyle = "green";
+              ctx.fillRect(-5, -5, 10, 10);
+              ctx.restore();
+              //ctx.rotate(0*Math.PI/180);
+
+              ctx.fillStyle = "blue";
+              ctx.fillRect(160, 100, 10, 10);
+              */
+
+              count++;
+              if (count > 360)
+                  count = 0;
+
+              if (count % 50 == 0 && objects.length <= 99)
+                  AddObject();
+
+              for (var i = 0, obj; obj = objects[i]; i++) {
+                  obj.Move();
+                  obj.Update();
+              }
+              cnt.value = objects.length;
+          }
+          window.setInterval("Animate();", 20);
+          function getRandomColor() {
+              var letters = '0123456789ABCDEF'.split('');
+              var color = '#';
+              for (var i = 0; i < 6; i++) {
+                  color += letters[Math.floor(Math.random() * 16)];
+              }
+              return color;
+          }
+
+          function AddObject() {
+              var obj = new Object();
+              obj.x = Math.random() * 280;
+              obj.y = Math.random() * 200;
+              obj.rotator = (Math.random() * 10) > 5;
+              obj.type = (Math.random() * 10) > 5 ? "block" : "actor";
+              if (obj.type == "actor")
+                  obj.width = 1;
+              obj.color = getRandomColor();
+              objects[objects.length] = obj;
+          }
+
+          function Object() {
+              //this.ID = 
+              this.x = 0;
+              this.y = 0;
+              this.width = 15;
+              this.height = 15;
+              this.rotation = 0;
+              this.color = "green";
+              this.rotator = false;
+              this.speed = 1;
+              this.speedUpDown = 1;
+              this.type = "block";
+
+              /**** arms ***/
+              this.angleLeftElbow = 90.0;
+              this.angleLeftHand = -15.0;
+              this.angleRightElbow = 90.0;
+              this.angleRightHand = -15.0;
+              this.bounceLeftElbow = 10;
+              this.bounceLeftHand = 10;
+              this.bounceRightElbow = -10;
+              this.bounceRightHand = -10;
+              /**** arms ****/
+              /**** legs ****/
+              this.angleLeftKnee = 70.0;
+              this.angleLeftFoot = 130.0;
+              this.angleRightKnee = 70.0;
+              this.angleRightFoot = 130.0;
+              this.bounceLeftKnee = 10;
+              this.bounceLeftFoot = 20;
+              this.bounceRightKnee = -10;
+              this.bounceRightFoot = -20;
+              /**** legs ****/
+              this.Move = function () {
+                  if (this.x < 0 || this.x + this.width > c.width)
+                      this.speed = this.speed * -1;
+
+                  if (this.y < 0 || this.y + this.height > c.height)
+                      this.speedUpDown = this.speedUpDown * -1;
+
+                  this.x += this.speed;
+                  this.y += this.speedUpDown;
+              };
+              this.Update = function () {
+                  switch (this.type) {
+                      case "block":
+                          ctx.fillStyle = this.color;
+                          if (this.rotator) {
+                              ctx.save();
+                              ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
+                              ctx.rotate(this.rotation * Math.PI / 180);
+                              ctx.fillRect(-(this.width / 2), -(this.height / 2), this.width, this.height);
+                          } else {
+                              ctx.fillRect(this.x, this.y, this.width, this.height);
+                          }
+                          if (this.rotator) {
+                              ctx.restore();
+                              if (this.rotation < 360)
+                                  this.rotation++;
+                              else
+                                  this.rotation = 0;
+                          }
+                          break;
+                      case "actor":
+                          this.hipsX = this.x;
+                          this.hipsY = this.y;
+                          if (this.speed < 0) {
+                              ctx.save();
+                              ctx.translate(this.x + (this.width / 2), this.y + (this.height / 2));
+                              ctx.scale(-1, 1);
+                              this.hipsX = -(this.width / 2);
+                              this.hipsY = -(this.height / 2);
+                          }
+
+                          ctx.lineWidth = "2";
+                          ctx.beginPath();
+                          ctx.strokeStyle = "black";
+                          ctx.moveTo(this.hipsX, this.hipsY);
+                          this.shoulderX = this.hipsX + this.height / 8;
+                          this.shoulderY = this.hipsY - this.height / 2;
+                          ctx.lineTo(this.shoulderX, this.shoulderY);
+                          ctx.stroke();
+                          ctx.closePath();
+                          /***** head ******/
+                          ctx.beginPath();
+                          ctx.fillStyle = "black";
+                          ctx.arc(this.shoulderX + (this.height/20), this.shoulderY - (this.height/(20/3)), (this.height/(20/3)), 0, Math.PI * 2);
+                          ctx.stroke();
+                          ctx.closePath();
+                          /***** head ******/
+                          this.Run(this);
+                          break;
+                  }
+              }
+              this.Run = function (self) {
+                  var minElbow = 40; //40 //70
+                  var maxElbow = 140; //140 //110
+                  var minKnee = 20; //20 //60
+                  var maxKnee = 120; //120 //80
+
+                  //self.angleLeftHand = 60;//-15.0;
+                  //self.angleRightHand = 60;//-15.0;
+                  //self.bounceLeftKnee = 10 / 2;
+                  //self.bounceRightKnee = -10 / 2;
+
+                  //self.bounceLeftElbow = 10/2;
+                  //self.bounceRightElbow = -10/2;
+                  /********** left arm *************/
+                  ctx.beginPath();
+                  ctx.moveTo(self.shoulderX, self.shoulderY);
+                  ctx.strokeStyle = "red";
+                  var leftElbowX = self.shoulderX + (Math.cos(((self.angleLeftElbow * Math.PI) / 180)) * this.height / 4);
+                  var leftElbowY = self.shoulderY + (Math.sin(((self.angleLeftElbow * Math.PI) / 180)) * this.height / 4);
+                  ctx.lineTo(leftElbowX, leftElbowY);
+                  var leftHandX = leftElbowX + (Math.cos(((self.angleLeftHand * Math.PI) / 180)) * this.height / 4);
+                  var leftHandY = leftElbowY + (Math.sin(((self.angleLeftHand * Math.PI) / 180)) * this.height / 4);
+                  ctx.lineTo(leftHandX, leftHandY);
+                  if (self.angleLeftElbow < minElbow || self.angleLeftElbow > maxElbow) {
+                      self.bounceLeftElbow *= -1;
+                      self.bounceLeftHand *= -1;
+                  }
+                  self.angleLeftElbow += self.bounceLeftElbow;
+                  self.angleLeftHand += self.bounceLeftHand;
+                  ctx.stroke();
+                  /********** left arm *************/
+                  /********** right arm *************/
+                  ctx.beginPath();
+                  ctx.moveTo(self.shoulderX, self.shoulderY);
+                  ctx.strokeStyle = "blue";
+                  var rightElbowX = self.shoulderX + (Math.cos(((self.angleRightElbow * Math.PI) / 180)) * this.height / 4);
+                  var rightElbowY = self.shoulderY + (Math.sin(((self.angleRightElbow * Math.PI) / 180)) * this.height / 4);
+                  ctx.lineTo(rightElbowX, rightElbowY);
+                  var rightHandX = rightElbowX + (Math.cos(((self.angleRightHand * Math.PI) / 180)) * this.height / 4);
+                  var rightHandY = rightElbowY + (Math.sin(((self.angleRightHand * Math.PI) / 180)) * this.height / 4);
+                  ctx.lineTo(rightHandX, rightHandY);
+                  if (self.angleRightElbow < minElbow || self.angleRightElbow > maxElbow) {
+                      self.bounceRightElbow *= -1;
+                      self.bounceRightHand *= -1;
+                  }
+                  self.angleRightElbow += self.bounceRightElbow;
+                  self.angleRightHand += self.bounceRightHand;
+                  ctx.stroke();
+                  /********** right arm *************/
+                  /********** right leg *************/
+                  ctx.beginPath();
+                  ctx.moveTo(self.hipsX, self.hipsY); //hips
+                  ctx.strokeStyle = "blue";
+                  var rightKneeX = self.hipsX + (Math.cos(((self.angleRightKnee * Math.PI) / 180)) * this.height / 3);
+                  var rightKneeY = self.hipsY + (Math.sin(((self.angleRightKnee * Math.PI) / 180)) * this.height / 3);
+                  ctx.lineTo(rightKneeX, rightKneeY);
+                  var rightFootX = rightKneeX + (Math.cos(((self.angleRightFoot * Math.PI) / 180)) * this.height/(10/3));
+                  var rightFootY = rightKneeY + (Math.sin(((self.angleRightFoot * Math.PI) / 180)) * this.height/(10/3));
+                  ctx.lineTo(rightFootX, rightFootY);
+                  if (self.angleRightKnee < minKnee || self.angleRightKnee > maxKnee) {
+                      self.bounceRightKnee *= -1;
+                      self.bounceRightFoot *= -1;
+                  }
+
+                  self.angleRightKnee += self.bounceRightKnee;
+                  if (self.bounceRightFoot > 0) {
+                      //this.angleRightFoot += this.bounceRightFoot/2;
+                      self.angleRightFoot = self.angleRightKnee + 20;
+                  }
+                  else {
+                      //this.angleRightFoot += this.bounceRightFoot / 2;
+                      self.angleRightFoot = self.angleRightKnee + 90;
+                  }
+                  ctx.stroke();
+                  /********** right leg *************/
+                  /********** left leg *************/
+                  ctx.beginPath();
+                  ctx.moveTo(self.hipsX, self.hipsY); //hips
+                  ctx.strokeStyle = "red";
+                  var leftKneeX = self.hipsX + (Math.cos(((self.angleLeftKnee * Math.PI) / 180)) * this.height / 3);
+                  var leftKneeY = self.hipsY + (Math.sin(((self.angleLeftKnee * Math.PI) / 180)) * this.height / 3);
+                  ctx.lineTo(leftKneeX, leftKneeY);
+                  var leftFootX = leftKneeX + (Math.cos(((self.angleLeftFoot * Math.PI) / 180)) * this.height/(10/3));
+                  var leftFootY = leftKneeY + (Math.sin(((self.angleLeftFoot * Math.PI) / 180)) * this.height/(10/3));
+                  ctx.lineTo(leftFootX, leftFootY);
+                  if (self.angleLeftKnee < minKnee || self.angleLeftKnee > maxKnee) {
+                      self.bounceLeftKnee *= -1;
+                      self.bounceLeftFoot *= -1;
+                  }
+                  self.angleLeftKnee += self.bounceLeftKnee;
+                  if (this.bounceLeftFoot > 0) {
+                      //this.angleRightFoot += this.bounceRightFoot/2;
+                      self.angleLeftFoot = self.angleLeftKnee + 20;
+                  }
+                  else {
+                      //this.angleRightFoot += this.bounceRightFoot / 2;
+                      self.angleLeftFoot = self.angleLeftKnee + 90;
+                  }
+                  ctx.stroke();
+                  /********** left leg *************/
+                  if (self.speed < 0) {
+                      ctx.restore();
+                  }
+              };
+              this.Walk = function () {
+
+
+
+              };
+          }
+      </script>
+   </body>
+</html>

@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Falling</title>
+    <script src="js/jquery-1.11.3.js"></script>
+    <link href="css/class.css" rel="stylesheet" />
+</head>
+<body onload="Simulation();"><smp>
+    <div class="header"></div>
+    <div class="mainContent">
+        <div class="leftPanel"></div>
+        <div class="content">
+            <canvas id="main" width="800" height="600" class="mc"></canvas>
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAVklEQVRIie2SOw4AIAhDe/MevW4GwiASB39NuhDxIRW4SVrsAoAUSNEYxq5eAkiCvGDs6vH6XHOfcHA+ApLPz65r05CN5zN4DjD/i54DnB9yBfD1takaMnVPptblyE4AAAAASUVORK5CYII=" alt="Alternate Text" />
+        </div>
+        <div class="rightPanel"></div>
+    </div>
+</smp>
+    <label for="txtTop" title="Top">Top</label>
+    <input type="text" id="txtTop" />
+    <input type="text" id="spd1" />
+    <input type="text" id="total" />
+    <input type="text" id="g" />
+    <input type="text" id="posX" />
+    <input type="text" id="posY" />
+    <input type="button" id="Pause" value="Pause" onclick="Pause();" />
+    <input type="button" id="AddBody" data-name="add" onclick="AddBody();" />
+    <input type="button" id="reset" data-name="add" onclick="Reset();" />
+    <script src="js/main_old.js"></script>
+</body>
+</html>

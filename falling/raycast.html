@@ -1,0 +1,319 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <canvas id="canvas" style="display:none"></canvas>
+    <canvas id="canvas2" width="640" height="360"></canvas>
+    <script>
+        var canvas = document.getElementById("canvas"),
+    ctx = canvas.getContext("2d");
+
+        canvas.width = canvas.height = 512;
+
+        var lights = [],
+            blocks = [],
+            vector = function (_x, _y) {
+                this.x = _x;
+                this.y = _y;
+            }
+        light = function (_position, _radius, _angleSpread, _color) {
+            this.color = _color;
+            this.radius = _radius;
+            this.angleSpread = _angleSpread;
+            this.position = _position;
+            this.angle = Math.random() * 180;
+        },
+        block = function (_position, _width, _height) {
+            this.position = _position;
+            this.width = _width;
+            this.height = _height;
+            this.visible = false;
+        },
+            angle = 0;
+
+
+        // FIND DISTANCE ************************
+        function findDistance(light, block, angle, rLen, start, shortest, closestBlock) {
+            var y = (block.position.y + block.height / 2) - light.position.y,
+                x = (block.position.x + block.width / 2) - light.position.x,
+                dist = Math.sqrt((y * y) + (x * x));
+
+            if (light.radius >= dist) {
+                var rads = angle * (Math.PI / 180),
+                    pointPos = new vector(light.position.x, light.position.y);
+
+                pointPos.x += Math.cos(rads) * dist;
+                pointPos.y += Math.sin(rads) * dist;
+
+                if (pointPos.x > block.position.x && pointPos.x < block.position.x + block.width && pointPos.y > block.position.y && pointPos.y < block.position.y + block.height) {
+                    if (start || dist < shortest) {
+                        start = false;
+                        shortest = dist;
+                        rLen = dist;
+                        closestBlock = block;
+                    }
+
+                    return { 'start': start, 'shortest': shortest, 'rLen': rLen, 'block': closestBlock };
+                }
+            }
+            return { 'start': start, 'shortest': shortest, 'rLen': rLen, 'block': closestBlock };
+        }
+        // **************************************
+
+        // SHINE LIGHT**************************
+        function shineLight(light) {
+            var curAngle = light.angle - (light.angleSpread / 2),
+                dynLen = light.radius,
+                addTo = 1 / light.radius;
+
+            for (curAngle; curAngle < light.angle + (light.angleSpread / 2) ; curAngle += (addTo * (180 / Math.PI)) * 2) {
+                dynLen = light.radius;
+
+                var findDistRes = {};
+                findDistRes.start = true;
+                findDistRes.shortest = 0;
+                findDistRes.rLen = dynLen,
+                findDistRes.block = {};
+
+                for (var i = 0; i < blocks.length; i++) {
+                    findDistRes = findDistance(light, blocks[i], curAngle, findDistRes.rLen, findDistRes.start, findDistRes.shortest, findDistRes.block);
+                }
+
+                var rads = curAngle * (Math.PI / 180),
+                    end = new vector(light.position.x, light.position.y);
+
+                findDistRes.block.visible = true;
+                end.x += Math.cos(rads) * findDistRes.rLen;
+                end.y += Math.sin(rads) * findDistRes.rLen;
+
+                ctx.beginPath();
+                ctx.moveTo(light.position.x, light.position.y);
+                ctx.lineTo(end.x, end.y);
+                ctx.closePath();
+                // ctx.clip();
+                ctx.stroke();
+            }
+        }
+        // ************************************
+
+        function draw() {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, 512, 512);
+            angle += 0.6;
+
+            for (var i = 0; i < blocks.length; i++) {
+                var block = blocks[i];
+                if (block.visible) {
+                    ctx.fillStyle = "rgb(200,0,0)";
+                    ctx.fillRect(block.position.x, block.position.y, block.width, block.height);
+                    block.visible = false;
+                } else {
+                    ctx.fillStyle = "rgba(200,0,0,0.3)";
+                    ctx.fillRect(block.position.x, block.position.y, block.width, block.height);
+                }
+            }
+
+            for (var i = 0; i < lights.length; i++) {
+                ctx.strokeStyle = lights[i].color;
+                lights[i].radius += Math.sin(angle);
+                shineLight(lights[i]);
+            }
+            setTimeout(draw, 30);
+        }
+
+        for (var i = 0; i < 50; i++) {
+            var size = (Math.random() * 20) + 2;
+            blocks.push(new block(new vector(Math.random() * 512, Math.random() * 512), size, size));
+        }
+
+        lights.push(new light(new vector(256, 256), 300, 360, 'rgba(255,255,255,0.1)'));
+
+        /*for(var i = 0; i < 2; i++){
+            var r= Math.floor(Math.random()*256),
+                g = Math.floor(Math.random()*256),
+                b = Math.floor(Math.random()*256);
+            
+            lights.push(new light(new vector(Math.random()*512,Math.random()*512), (Math.random()*200)+100, 60, 'rgba(' + r + ',' + g + ',' + b + ',0.1)'));
+        }*/
+
+        draw();
+
+
+
+    </script>
+    <script>
+
+
+        // Find intersection of RAY & SEGMENT
+        function getIntersection(ray, segment) {
+
+            // RAY in parametric: Point + Direction*T1
+            var r_px = ray.a.x;
+            var r_py = ray.a.y;
+            var r_dx = ray.b.x - ray.a.x;
+            var r_dy = ray.b.y - ray.a.y;
+
+            // SEGMENT in parametric: Point + Direction*T2
+            var s_px = segment.a.x;
+            var s_py = segment.a.y;
+            var s_dx = segment.b.x - segment.a.x;
+            var s_dy = segment.b.y - segment.a.y;
+
+            // Are they parallel? If so, no intersect
+            var r_mag = Math.sqrt(r_dx * r_dx + r_dy * r_dy);
+            var s_mag = Math.sqrt(s_dx * s_dx + s_dy * s_dy);
+            if (r_dx / r_mag == s_dx / s_mag && r_dy / r_mag == s_dy / s_mag) { // Directions are the same.
+                return null;
+            }
+
+            // SOLVE FOR T1 & T2
+            // r_px+r_dx*T1 = s_px+s_dx*T2 && r_py+r_dy*T1 = s_py+s_dy*T2
+            // ==> T1 = (s_px+s_dx*T2-r_px)/r_dx = (s_py+s_dy*T2-r_py)/r_dy
+            // ==> s_px*r_dy + s_dx*T2*r_dy - r_px*r_dy = s_py*r_dx + s_dy*T2*r_dx - r_py*r_dx
+            // ==> T2 = (r_dx*(s_py-r_py) + r_dy*(r_px-s_px))/(s_dx*r_dy - s_dy*r_dx)
+            var T2 = (r_dx * (s_py - r_py) + r_dy * (r_px - s_px)) / (s_dx * r_dy - s_dy * r_dx);
+            var T1 = (s_px + s_dx * T2 - r_px) / r_dx;
+
+            // Must be within parametic whatevers for RAY/SEGMENT
+            if (T1 < 0) return null;
+            if (T2 < 0 || T2 > 1) return null;
+
+            // Return the POINT OF INTERSECTION
+            return {
+                x: r_px + r_dx * T1,
+                y: r_py + r_dy * T1,
+                param: T1
+            };
+
+        }
+
+        ///////////////////////////////////////////////////////
+
+        // DRAWING
+        var canvas = document.getElementById("canvas2");
+        var ctx = canvas.getContext("2d");
+        function draw() {
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw segments
+            ctx.strokeStyle = "#999";
+            for (var i = 0; i < segments.length; i++) {
+                var seg = segments[i];
+                ctx.beginPath();
+                ctx.moveTo(seg.a.x, seg.a.y);
+                ctx.lineTo(seg.b.x, seg.b.y);
+                ctx.stroke();
+            }
+
+            // Ray from center of screen to mouse
+            var ray = {
+                a: { x: 320, y: 180 },
+                b: { x: Mouse.x, y: Mouse.y }
+            };
+
+            // Find CLOSEST intersection
+            var closestIntersect = null;
+            for (var i = 0; i < segments.length; i++) {
+                var intersect = getIntersection(ray, segments[i]);
+                if (!intersect) continue;
+                if (!closestIntersect || intersect.param < closestIntersect.param) {
+                    closestIntersect = intersect;
+                }
+            }
+            var intersect = closestIntersect;
+
+            // Draw red laser
+            ctx.strokeStyle = "#dd3838";
+            ctx.beginPath();
+            ctx.moveTo(320, 180);
+            ctx.lineTo(intersect.x, intersect.y);
+            ctx.stroke();
+
+            // Draw red dot
+            ctx.fillStyle = "#dd3838";
+            ctx.beginPath();
+            ctx.arc(intersect.x, intersect.y, 4, 0, 2 * Math.PI, false);
+            ctx.fill();
+
+
+        }
+
+        // LINE SEGMENTS
+        var segments = [
+
+            // Border
+            { a: { x: 0, y: 0 }, b: { x: 640, y: 0 } },
+            { a: { x: 640, y: 0 }, b: { x: 640, y: 360 } },
+            { a: { x: 640, y: 360 }, b: { x: 0, y: 360 } },
+            { a: { x: 0, y: 360 }, b: { x: 0, y: 0 } },
+
+            // Polygon #1
+            { a: { x: 100, y: 150 }, b: { x: 120, y: 50 } },
+            { a: { x: 120, y: 50 }, b: { x: 200, y: 80 } },
+            { a: { x: 200, y: 80 }, b: { x: 140, y: 210 } },
+            { a: { x: 140, y: 210 }, b: { x: 100, y: 150 } },
+
+            // Polygon #2
+            { a: { x: 100, y: 200 }, b: { x: 120, y: 250 } },
+            { a: { x: 120, y: 250 }, b: { x: 60, y: 300 } },
+            { a: { x: 60, y: 300 }, b: { x: 100, y: 200 } },
+
+            // Polygon #3
+            { a: { x: 200, y: 260 }, b: { x: 220, y: 150 } },
+            { a: { x: 220, y: 150 }, b: { x: 300, y: 200 } },
+            { a: { x: 300, y: 200 }, b: { x: 350, y: 320 } },
+            { a: { x: 350, y: 320 }, b: { x: 200, y: 260 } },
+
+            // Polygon #4
+            { a: { x: 340, y: 60 }, b: { x: 360, y: 40 } },
+            { a: { x: 360, y: 40 }, b: { x: 370, y: 70 } },
+            { a: { x: 370, y: 70 }, b: { x: 340, y: 60 } },
+
+            // Polygon #5
+            { a: { x: 450, y: 190 }, b: { x: 560, y: 170 } },
+            { a: { x: 560, y: 170 }, b: { x: 540, y: 270 } },
+            { a: { x: 540, y: 270 }, b: { x: 430, y: 290 } },
+            { a: { x: 430, y: 290 }, b: { x: 450, y: 190 } },
+
+            // Polygon #6
+            { a: { x: 400, y: 95 }, b: { x: 580, y: 50 } },
+            { a: { x: 580, y: 50 }, b: { x: 480, y: 150 } },
+            { a: { x: 480, y: 150 }, b: { x: 400, y: 95 } }
+
+        ];
+
+        // DRAW LOOP
+        window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
+        var updateCanvas = true;
+        function drawLoop() {
+            requestAnimationFrame(drawLoop);
+            if (updateCanvas) {
+                draw();
+                updateCanvas = false;
+            }
+        }
+        window.onload = function () {
+            drawLoop();
+        };
+
+        // MOUSE	
+        var Mouse = {
+            x: canvas.width / 2 + 10,
+            y: canvas.height / 2
+        };
+        canvas.onmousemove = function (event) {
+            Mouse.x = event.clientX;
+            Mouse.y = event.clientY;
+            updateCanvas = true;
+        };
+
+
+    </script>
+</body>
+</html>
