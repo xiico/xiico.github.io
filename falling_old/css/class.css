@@ -9,19 +9,14 @@
         {
             top:200px;
             /*width:100%;*/
-            height:320px;/*240*//*480*/
+            height:240px;/*240*//*480*/
             /*height:480px;/*240*//*480*/
-            background-color:black;
-            width: 480px;
-            height: 320px;
-            border: 1px solid #3b3d42;
-            image-rendering: optimizeSpeed;
-            -webkit-interpolation-mode: nearest-neighbor;
+            background-color:aqua;
         }
 
         .header {
             float:left;
-            height:10px;
+            height:100px;
             width:100%;
             background-color:antiquewhite;
         }
@@ -35,20 +30,11 @@
         .leftPanel
         {
             float:left;
-            width: calc(50% - 240px);/*170*//*320*//*240*/
+            width: calc(50% - 160px);/*170*//*320*/
             /*width: calc(50% - 320px);/*160*//*320*/
             background-color:blue;
             /*position:relative;*/
-            height:310px;
-        }
-        .rightPanel
-        {
-            float:right;
-            width: calc(50% - 240px);/*170*//*320*//*240*/
-            /*width: calc(50% - 320px);/*160*//*320*/
-            background-color:coral;
-            /*position:relative;*/
-            height:310px;
+            height:600px;
         }
         .content
         {
@@ -59,6 +45,15 @@
             max-width:320px;/*320*//*640*/
             /*min-width:640px;/*320*//*640*/
             /*max-width:640px;/*320*//*640*/
+        }
+        .rightPanel
+        {
+            float:right;
+            width: calc(50% - 160px);/*170*//*320*/
+            /*width: calc(50% - 320px);/*160*//*320*/
+            background-color:coral;
+            /*position:relative;*/
+            height:600px;
         }
         .divControls{
             float:left;
