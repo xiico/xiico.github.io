@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Falling</title>
+    <!--<link href="css/class.css" rel="stylesheet" />-->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta content='initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta charset="utf-8" />
+    <style type="text/css">
+        html,body {
+            background-repeat: no-repeat;
+            /*margin: 4px 0 0 2px;
+            width: 336px;
+            /*color: #fff;*/
+            margin:0;
+            height:100%;
+            overflow:hidden;
+        }
+
+        /*canvas {            
+            height:auto;
+            width:auto;
+            position:absolute;
+            top:-100%; bottom:-100%;
+            left:-100%; right:-100%;
+            margin:auto;
+        }*/
+
+        .divControls {
+            float: left;
+        }
+        
+        .divJump {
+            float: right;
+        }
+        
+        .bottom {
+            float: right;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body onload="fg.Game.start();">
+    <div class="header"></div>
+    <div id="mc" class="mainContent" data-type="content">
+        <div class="content">
+            <canvas id="main" width="380" height="500" class="mc"></canvas>
+        </div>
+    </div>
+    <input type="hidden" id="hdn" value="myHidden" />
+    <script src="js/main.js"></script>
+    </div>
+</body>
+
+</html>
