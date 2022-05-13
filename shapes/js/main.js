@@ -1631,6 +1631,7 @@ fg.Input = {
         evt.preventDefault();
         fg.Input.log("touchstart.");
         var touches = evt.changedTouches;
+        if (!touches) touches = [{identifier:0,pageX:evt.pageX,pageY:evt.pageY,clientX:evt.clientX,clientY:evt.clientY}];
         for (var i = 0; i < touches.length; i++) {
             fg.Input.log("touchstart:" + i + "...");
             fg.Input.ongoingTouches.push(fg.Input.copyTouch(touches[i]));
