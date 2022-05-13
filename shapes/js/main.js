@@ -1649,7 +1649,7 @@ fg.Input = {
         evt.preventDefault();
         fg.Input.log("touchend");
         var touches = evt.changedTouches;
-
+        if (!touches) touches = [{identifier:0,pageX:evt.pageX,pageY:evt.pageY,clientX:evt.clientX,clientY:evt.clientY}];
         for (var i = 0; i < touches.length; i++) {
             var color = fg.Input.colorForTouch(touches[i]);
             var idx = fg.Input.ongoingTouchIndexById(touches[i].identifier);
