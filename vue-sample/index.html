@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+
+    <!-- Don't use this in production: -->
+    <!-- <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> -->
+    <link rel="stylesheet" href="https://www.live.flexyscore.net/dirette/temp/css/tennis.css">
+    <style>
+      /* INSTRUCTION and example for customize TENNIS scoreboard:
+Each element has one or more classes, so you can control one or more elements at the same time.
+On the left you can read every single element with his class */
+
+/* THIS control the size of all caracters, use vw units for mantein responsive layout */
+.containertennis {
+    font-size: 6vw;
+  }
+  
+  /* THIS insert a Big Bold Ball in service signal */
+  .containertennis .okservice {
+    background: url(https://www.flexyscore.net/folder/tennisball.svg);
+    transform: translate(-50%, -50%) scale(2);
+  }
+  
+  .box, .label, .sgrlogo:before {
+    background: #3d9f00;
+    color: #194200;
+  }
+  .boxset {
+    border-left: solid 2px #dec405;
+  }
+  
+  .labelgames, .boxhomegames, .boxawaygames {
+    background: #51d200;
+    color: #d24b00;
+  }
+  
+  .labelpoints, .boxhomepoints, .boxawaypoints {
+    color: #FCD600;
+  }
+  
+  .boxhometeam, .boxawayteam {
+    background: #296c00;
+    color: #FCD600;
+  }
+  
+  
+  /*-------------------------------------------------------------------
+  ---- UNDER: background color and a little spase from margins. PLEASE DO NOT CONSIDER THIS-*/
+  body {background:#333;}
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <section id="boxes">
+        <div class="container containertennis">
+          <div class="sgrlogo" :style="{background: 'url(https://www.live.flexyscore.net/logofs.svg)', noRepeat: 'center'}"></div>
+          <div class="label labelpoints">Pt</div>
+          <div class="label labelgames">Gm</div>
+          <div class="box boxhometeam" id="team_1">{{game.team1.name}}</div>
+          <div class="box numbers boxhomepoints" @click="addScore(1)" id="points_1">{{team1Score()}}</div>
+          <div class="box numbers boxhomegames" id="game_1">{{game.gameScore[0]}}</div>
+          <div class="box boxawayteam" id="team_2">{{game.team2.name}}</div>
+          <div class="box numbers boxawaypoints" @click="addScore(null,1)" id="points_2">{{team2Score()}}</div>
+          <div class="box numbers boxawaygames" id="game_2">{{game.gameScore[1]}}</div>
+          <div class="box boxservice boxhomeservice"><span id="homeservice" :class="serving == 0 ? 'okservice' : ''"></span></div>
+          <div class="box boxservice boxawayservice"><span id="awayservice" :class="serving == 1 ? 'okservice' : ''"></span></div>
+          <div :key="i" v-for="(entry,i) in this.game.score" class="box boxset boxon" :id="`set_${(Math.floor(i%10/2)) + 1}_points_${i%2==0 ? '1' : '2'}`">{{teamWins(i,i%2==0 ? 1 : 2)}}</div>
+        </div>
+      </section>
+    </div>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.26/vue.min.js"></script> -->
+    <script>
+      // import './App.css';
+      var app = new Vue({
+                          el: '#app',
+                          data: {
+                            game: {
+                                    name: 'Jogo Um',
+                                    team1: {name:'Time um',coach:'João'},
+                                    team2: {name:'Time dois',coach:'Pedro'},
+                                    set: 0,
+                                    gameScore: [0,0],
+                                    serving: 1,
+                                    score:[]
+                                  },
+                            serving: 1
+                          },
+                          methods: {
+                            addScore(one,two) {
+                              let game = this.game;
+                              let score;
+                              if (this.team1Score() == 3) game.gameScore[0]++;
+                              if (this.team2Score() == 3) game.gameScore[1]++;
+                              if (this.team1Score() == 3 || this.team2Score() == 3) return this.resetScores(game);
+                              if (one) score = [{winner:true,positions:[], set:game.set},{positions:[], set:game.set}];
+                              else score = [{positions:[], set:game.set},{winner:true,positions:[], set:game.set}];
+                              game.score.push(...score);
+                              this.serving = this.serving == 1 ? 0 : 1;
+                              // setcurgame(game);
+                            },
+                            resetScores(game) {
+                              game.set++;
+                              while(game.score.length % 10 != 0) game.score.push({}); 
+                              this.serving = (this.serving == 1 ? 0 : 1);
+                              // setcurgame(game);
+                            },
+                            team1Score() {
+                              return this.teamWins(this.game.score.length - 1, 1, true)
+                            },
+                            team2Score() {
+                              return this.teamWins(this.game.score.length - 1, 2, true)
+                            },
+                            teamWins(index, team, showAll) {
+                              if (!showAll && (index < 0 || !this.game.score[index].winner)) return ' ';
+                              if (team === 1) return this.game.score.filter((e,i) => i <= index && e.set == this.game.set && e.winner && !(i%2)).length;
+                              return this.game.score.filter((e,i) => i <= index && e.set == this.game.set && e.winner && !!(i%2)).length;
+                            },
+                          },
+                        });
+    </script>
+    <!--
+      Note: this page is a great way to try React but it's not suitable for production.
+      It slowly compiles JSX with Babel in the browser and uses a large development build of React.
+
+      Read this section for a production-ready setup with JSX:
+      https://reactjs.org/docs/add-react-to-a-website.html#add-jsx-to-a-project
+
+      In a larger project, you can use an integrated toolchain that includes JSX instead:
+      https://reactjs.org/docs/create-a-new-react-app.html
+
+      You can also use React without JSX, in which case you can remove Babel:
+      https://reactjs.org/docs/react-without-jsx.html
+    -->
+  </body>
+</html>
